@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% load static %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+
+ <nav class="navbar navbar-light bg-light">
+    <div class="container-fluid">
+        <div class="navbar-header">
+              <a class="navbar-brand" href="{% url 'courses:index' %}">Home</a>
+        </div>
+        <ul class="nav navbar-nav navbar-right">
+            {% if user.is_authenticated %}
+            <li>
+                <a class="btn btn-link" href="#">{{ user.first_name }}({{ user.username }})</a>
+                <a class="btn btn-link" href="{% url 'courses:logout' %}">Logout</a>
+            </li>
+            {% else %}
+            <li>
+                <form class="form-inline" action="{% url 'courses:login' %}" method="post">
+                    {% csrf_token %}
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Username" name="username" >
+                        <input type="password" class="form-control" placeholder="Username" name="psw" >
+                        <button class="btn btn-primary" type="submit">Login</button>
+                        <a class="btn btn-link" href="{% url 'courses:registration' %}">Sign Up</a>
+                    </div>
+                </form>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
+
+<div class="container-fluid">
+<div class="page-header">
+	{% load humanize %}
+    {% if 0.8 > total_per_cent %}
+    	<div>
+        <div class="alert alert-danger">
+        	<b>Failed</b> Sorry, {{user.first_name}}, you have failed exam with score {{score|floatformat:2|intcomma}}/{{total_score|floatformat:2|intcomma}}
+            <!--HINT Display failed info -->
+        </div>
+       <!--   {% comment class="btn btn-link text-danger" %}       -->
+       <h1><a href="{% url 'courses:course_details' course.id %}"><b>Re-test</b></a> </h1>
+       <!--   {% endcomment %}   -->
+       </div>
+    {% else %}     
+       <div class="alert alert-success">
+       		<b>Congratulations, {{user.first_name}} </b> You have passed the exam and completed the course with score of {{score|floatformat:2|intcomma}}/{{total_score|floatformat:2|intcomma}}
+    	</div>
+    {% endif %}
+    {% if total_per_cent < 0.8 %}
+    <div>
+    	<h5><a class="btn btn-link text-danger" href="{% url 'courses:course_details' course.id %}"><b>Re-test</b></a> </h5>
+    </div>
+    {% endif %}
+    <p>
+</div>
+<div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">
+ <div class="container-fluid">
+  <h3 class="my-0 mr-md-auto font-weight-normal align-items-center">Exam Results </h3>
+    {% for question in questions %}
+    	<div class="jumbotron border rounded-5>" style="padding:2px; padding-left:5px;">
+    	<h4>{{question.text}}</h4>
+    	{% for choice in question.choices %}
+	    	{% if choice.status == "selected_and_true" %}
+	    		<div style="color:green; padding-left:15px;">Correct answer : 
+ 	    	{% elif choice.status == "selected_but_false" %}
+	    		<div style="color:red; padding-left:15px;">Incorrect answer : 
+			{% else %}
+	    		<div style="padding-left:15px;">
+	    	{% endif %}
+	    		{{choice.text}}</div>
+	    	{% if choice.status == "missing" %}
+	    	<h6 style="color:blue;">Some good response(s), is(are) not selected !</h6>
+	    	{% endif %}
+    	{% endfor %}
+    	</div>
+    {% endfor %}
+    </div>
+    </p>
+    </div>       <!--HINT Display exam results-->
+</body>
+</html>
